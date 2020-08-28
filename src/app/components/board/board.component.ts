@@ -17,6 +17,7 @@ export class BoardComponent implements OnInit {
 
   //# Essentials
   imgObj:any;
+  URL:any
   canvasElement: any;
   canvasEl: any;
   backgroundCanvas:any;
@@ -28,6 +29,7 @@ export class BoardComponent implements OnInit {
   notebook:any=[];
   // for PDF.js
   pdf_js:any;
+  localUrl:any;
   no_of_pages: any;
   //PDF tracking
   pageTracking:Tracking[] = [];
@@ -80,7 +82,7 @@ basic_tools = {
   getScreenSize(event?) {
         this.scrHeight = window.innerHeight;
         this.scrWidth = window.innerWidth-220;
-       
+
   }
 
   constructor(public renderer:Renderer) {
@@ -108,7 +110,7 @@ basic_tools = {
     const zoom  = this.canvasEl.getZoom() * scale;
     console.log(containerWidth,"containerWidth",containerHeight,"containerHeight",scale,"scale",zoom,"zoom");
     this.canvasEl.setDimensions({width: containerWidth, height: containerWidth / ratio});
-    this.canvasEl.setViewportTransform([zoom, 0, 0, zoom, 0, 0]);    
+    this.canvasEl.setViewportTransform([zoom, 0, 0, zoom, 0, 0]);
   }
 
   nextPage(){
@@ -128,7 +130,7 @@ basic_tools = {
     //Increment Paage number
     this.page = this.page+1
     console.log("New page number", this.page);
-    
+
     //If that page already exists
     if(this.notebook[this.page]){
       //Loading the page
@@ -163,7 +165,7 @@ basic_tools = {
     }
   }
     }
-  
+
   addRect(){
   var rect = new fabric.Rect({
     left: 100,
@@ -175,60 +177,97 @@ basic_tools = {
   // "add" rectangle onto canvas
   this.canvasEl.add(rect);
   }
-  
-  showPreviewImage(e:any){
-    console.log(e);
-    var reader = new FileReader();
-    console.log("Reader",reader);
-    
-    reader.onload = (event:any)=> {
-      console.log("Hahaha");
-      var imgObj = new Image();
-      imgObj.src = event.target.result;
 
-      var image = new fabric.Image(imgObj);
-      console.log("Image",image);
-      
-      image.set({
-        left: 10,
-        top: 10,
-        angle: 20,
-        padding: 10,
-        cornersize: 10
-      });
-      this.canvasEl.add(image);
-      console.log("Image set~!!");
-      
-    }
-    reader.readAsDataURL(e.target.files[0]);
+
+  showPreviewImage(){
+
+    fabric.Image.fromURL("https://image.shutterstock.com/image-vector/big-small-cartoon-elephants-vector-260nw-419531956.jpg", function(oImg) {
+      this.canvasEl.add(oImg);
+      sessionStorage.setItem('key', oImg);
+    });
+
   }
 
+  // showPreviewImage(e:any){
+  //   console.log(e);
+  //   var reader = new FileReader();
+  //   console.log("Reader",reader);
+
+  //   reader.onload = (event:any)=> {
+  //     console.log("Hahaha");
+  //     var imgObj = new Image();
+  //     imgObj.src = event.target.result;
+
+  //     var image = new fabric.Image(imgObj);
+  //     console.log("Image",image);
+
+  //     image.set({
+  //       left: 10,
+  //       top: 10,
+  //       angle: 20,
+  //       padding: 10,
+  //       cornersize: 10,
+  //     });
+  //     image.scaleToHeight(100);
+  //     image.scaleToWidth(200);
+  //     this.canvasEl.add(image);
+  //     console.log("Image set~!!");
+
+  //   }
+  //   reader.readAsDataURL(e.target.files[0]);
+
+  // }
+
+    showPreviewPDF(event: any) {
+    //checking if file is uploading
+    if (event.target.files && event.target.files[0]) {
+        var reader = new FileReader();
+        reader.onload = (event: any) => {
+            this.localUrl = event.target.result;
+            this.pdf_js = pdfjsLib.getDocument(this.localUrl)
+
+            this.pdf_js.promise.then(doc => {
+              console.log("PDF LOADED");
+              console.log("THis pdf has ", doc._pdfInfo.numPages);
+              this.no_of_pages = doc._pdfInfo.numPages
+
+            //once the whole file is uploaded
+            // this.function_PDF_tracking(this.no_of_pages)
+            this.addPdf(1)
+            })
+
+        }
+        reader.readAsDataURL(event.target.files[0]);
+        console.log("Local URL", this.localUrl);
+    }
+}
 
 
 
 
 
-//   addPdf(page_number){
-//     this.pdf_js.promise.then(doc => {
-//       console.log("PDF LOADED");
-//       console.log("THis pdf has ", doc._pdfInfo.numPages);
-//       // this.no_of_pages = doc._pdfInfo.numPages
 
-//       doc.getPage(page_number).then(page => {
-//         let canvas:any = document.getElementById("my_canvas")
-//         let context:any = canvas.getContext("2d")
-//         let viewport:any = page.getViewport({ scale: 1.3})
-//         viewport.height=this.scrHeight
-//         this.pdf_added_boolean = true
-//         // viewport.width = '200px';
-//         page.render({
-//           canvasContext: context,
-//           viewport: viewport
-//         })
-//       })
+  addPdf(page_number){
+    this.pdf_js.promise.then(doc => {
+      console.log("PDF LOADED");
+      console.log("THis pdf has ", doc._pdfInfo.numPages);
+      // this.no_of_pages = doc._pdfInfo.numPages
 
-//     })
-//   }
+      doc.getPage(page_number).then(page => {
+        let canvas:any = document.getElementById("my_canvas")
+        let context:any = canvas.getContext("2d")
+        let viewport:any = page.getViewport({ scale: 1.3})
+        viewport.height=this.scrHeight
+        this.pdf_added_boolean = true
+        // viewport.width = '200px';
+        page.render({
+          canvasContext: context,
+          viewport: viewport
+        })
+      })
+
+    })
+  }
 
 //   //pen Button
 //   penButton(){

@@ -160,17 +160,11 @@
       </div> -->
       <div class="btn-files">
         <div class="pdfUpload">
-          <input type="file" id="file"  (change)="showPreviewImage($event)"/>
+          <input type="file" id="file"  (change)="showPreviewPDF($event)"/>
           <label for="file" class="btn-1">Upload pdf</label>
         </div>
       </div>
-      <div class="btn-files">
-        <div class="pdfUpload">
-          <input type="file" id="file"  (change)="showPreviewImage($event)"/>
-          <label for="file" class="btn-1">Upload Image</label>
-        </div>
-      </div>
-      <input type="file" id="imgLoader" (change)="showPreviewImage($event)">
+      <input type="file" id="imgLoader" (change)="showPreviewImage()">
 
       </li>
       <!-- Buttons -->
