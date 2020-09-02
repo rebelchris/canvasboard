@@ -4,6 +4,7 @@ import {Tracking} from '../../../interfaces/tracking'
 import { log } from 'util';
 declare const pdfjsLib:any
 declare const fabric: any;
+
 @Component({
   selector: 'app-board',
   templateUrl: './board.component.html',
